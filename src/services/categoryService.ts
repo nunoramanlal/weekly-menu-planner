@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '../supabase';
 import type { Category } from '../types/menu';
 
 export async function getCategories(): Promise<Category[]> {
@@ -30,4 +30,15 @@ export async function createCategory(
   }
 
   return data;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }

@@ -1,4 +1,7 @@
-export type MenuStatus = 'current' | 'previous' | 'backlog';
+export type MenuStatus =
+  | 'current'
+  | 'previous'
+  | 'backlog';
 
 export type DayOfWeek =
   | 'monday'
@@ -9,7 +12,9 @@ export type DayOfWeek =
   | 'saturday'
   | 'sunday';
 
-export type MealType = 'lunch' | 'dinner';
+export type MealType =
+  | 'lunch'
+  | 'dinner';
 
 export interface Category {
   id: number;
