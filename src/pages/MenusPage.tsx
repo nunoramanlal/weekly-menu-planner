@@ -7,6 +7,7 @@ import type {
 } from '../types/menu';
 
 import {
+  deleteMenu,
   getMenu,
   getMenus,
 } from '../services/menuService';
@@ -83,6 +84,38 @@ export default function MenusPage({
     }
   }
 
+  async function handleDelete(menu: Menu) {
+    const confirmed = window.confirm(
+      `Delete the menu for the week starting ${menu.week_start}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError(null);
+
+      await deleteMenu(menu.id);
+
+      setMenus((current) =>
+        current.filter(
+          (item) => item.id !== menu.id
+        )
+      );
+
+      if (selectedMenu?.id === menu.id) {
+        setSelectedMenu(null);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not delete menu.'
+      );
+    }
+  }
+
   return (
     <>
       <PageHeader
@@ -113,6 +146,7 @@ export default function MenusPage({
           menus={menus}
           onSelect={handleSelect}
           onCreate={onCreateMenu}
+          onDelete={handleDelete}
         />
       )}
 

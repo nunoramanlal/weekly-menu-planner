@@ -59,18 +59,18 @@ export async function getMenu(
     throw new Error(daysError.message);
   }
 
-  const normalizedDays: MenuDay[] = (menuDays ?? []).map(
-    (row: any) => ({
-      id: row.id,
-      menu_id: row.menu_id,
-      day_of_the_week: row.day_of_the_week,
-      meal_type: row.meal_type,
-      dish_id: row.dish_id,
-      dish: Array.isArray(row.dishes)
-        ? row.dishes[0]
-        : row.dishes,
-    })
-  );
+  const normalizedDays: MenuDay[] = (
+    menuDays ?? []
+  ).map((row: any) => ({
+    id: row.id,
+    menu_id: row.menu_id,
+    day_of_the_week: row.day_of_the_week,
+    meal_type: row.meal_type,
+    dish_id: row.dish_id,
+    dish: Array.isArray(row.dishes)
+      ? row.dishes[0]
+      : row.dishes,
+  }));
 
   return {
     ...menu,
@@ -152,5 +152,33 @@ export async function deleteMenuDay(
 
   if (error) {
     throw new Error(error.message);
+  }
+}
+
+export async function deleteMenu(
+  id: number
+): Promise<void> {
+  // Delete the meals belonging to this menu first.
+  const { error: daysError } = await supabase
+    .from('menu_days')
+    .delete()
+    .eq('menu_id', id);
+
+  if (daysError) {
+    throw new Error(
+      `Could not delete menu meals: ${daysError.message}`
+    );
+  }
+
+  // Then delete the menu.
+  const { error: menuError } = await supabase
+    .from('menus')
+    .delete()
+    .eq('id', id);
+
+  if (menuError) {
+    throw new Error(
+      `Could not delete menu: ${menuError.message}`
+    );
   }
 }

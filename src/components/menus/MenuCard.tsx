@@ -10,36 +10,67 @@ import {
 interface Props {
   menu: Menu;
   onClick: () => void;
+  onDelete: () => void;
 }
 
 export default function MenuCard({
   menu,
   onClick,
+  onDelete,
 }: Props) {
   return (
-    <button
-      className="menu-card"
-      onClick={onClick}
-    >
-      <div className="menu-card-top">
-        <StatusBadge status={menu.status} />
+    <article className="menu-card">
+      <div className="menu-card-header">
+        <button
+          className="menu-card-main"
+          type="button"
+          onClick={onClick}
+        >
+          <div className="eyebrow">
+            {getWeekLabel(menu.week_start)}
+          </div>
 
-        <span className="menu-date">
-          {formatDate(menu.week_start)}
-        </span>
+          <h3>
+            Week starting{' '}
+            {formatDate(menu.week_start)}
+          </h3>
+        </button>
+
+        <button
+          className="icon-button danger-icon"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete();
+          }}
+          aria-label={`Delete menu for ${formatDate(
+            menu.week_start
+          )}`}
+          title="Delete menu"
+        >
+          ×
+        </button>
       </div>
 
-      <h3>
-        Week of {getWeekLabel(menu.week_start)}
-      </h3>
+      <div className="menu-card-meta">
+        <StatusBadge status={menu.status} />
+      </div>
 
-      {menu.notes ? (
-        <p>{menu.notes}</p>
-      ) : (
-        <p className="muted">
-          No notes
+      {menu.notes && (
+        <p className="menu-card-notes">
+          {menu.notes}
         </p>
       )}
-    </button>
+
+      <div className="menu-card-footer">
+        <button
+          className="button secondary small"
+          type="button"
+          onClick={onClick}
+        >
+          View menu
+        </button>
+      </div>
+    </article>
   );
 }

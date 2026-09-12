@@ -688,4 +688,32 @@ textarea {
     grid-template-columns: 1fr;
     gap: 8px;
   }
+
+.menu-card-main {
+  flex: 1;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: inherit;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-card-main:hover h3 {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.menu-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1rem;
+}
 }

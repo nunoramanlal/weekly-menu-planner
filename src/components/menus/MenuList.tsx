@@ -7,12 +7,14 @@ interface Props {
   menus: Menu[];
   onSelect: (menu: Menu) => void;
   onCreate: () => void;
+  onDelete: (menu: Menu) => void;
 }
 
 export default function MenuList({
   menus,
   onSelect,
   onCreate,
+  onDelete,
 }: Props) {
   if (menus.length === 0) {
     return (
@@ -22,6 +24,7 @@ export default function MenuList({
         action={
           <button
             className="button primary"
+            type="button"
             onClick={onCreate}
           >
             Create menu
@@ -32,12 +35,13 @@ export default function MenuList({
   }
 
   return (
-    <div className="menu-grid">
+    <div className="menu-list">
       {menus.map((menu) => (
         <MenuCard
           key={menu.id}
           menu={menu}
           onClick={() => onSelect(menu)}
+          onDelete={() => onDelete(menu)}
         />
       ))}
     </div>
