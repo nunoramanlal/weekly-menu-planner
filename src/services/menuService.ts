@@ -2,7 +2,6 @@ import { supabase } from '../utils/supabaseClient';
 import type {
   CreateMenuInput,
   Menu,
-  MenuDay,
   MenuWithDays,
 } from '../types/menu';
 
