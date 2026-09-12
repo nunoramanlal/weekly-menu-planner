@@ -1,20 +1,49 @@
-import type { Menu } from '../../types/menu';
+import type {
+  Dish,
+  Menu,
+  MenuStatus,
+  MenuWithDays,
+} from '../../types/menu';
 
 import MenuCard from './MenuCard';
 import EmptyState from '../common/EmptyState';
+import MenuDetails from './MenuDetails';
 
 interface Props {
   menus: Menu[];
-  onSelect: (menu: Menu) => void;
+  dishes: Dish[];
+  expandedMenuId: number | null;
+  expandedMenu: MenuWithDays | null;
+  expandedLoading: boolean;
+  onToggle: (menu: Menu) => void;
   onCreate: () => void;
   onDelete: (menu: Menu) => void;
+  onStatusChange: (menu: Menu, status: MenuStatus) => void;
+  onSaveMeal: MenuWithDays extends never
+    ? never
+    : (
+        id: number,
+        updates: {
+          dayOfTheWeek: import('../../types/menu').DayOfWeek;
+          mealType: 'lunch' | 'dinner';
+          dishId: number | null;
+        }
+      ) => Promise<void>;
+  onDeleteMeal: (id: number) => Promise<void>;
 }
 
 export default function MenuList({
   menus,
-  onSelect,
+  dishes,
+  expandedMenuId,
+  expandedMenu,
+  expandedLoading,
+  onToggle,
   onCreate,
   onDelete,
+  onStatusChange,
+  onSaveMeal,
+  onDeleteMeal,
 }: Props) {
   if (menus.length === 0) {
     return (
@@ -36,14 +65,36 @@ export default function MenuList({
 
   return (
     <div className="menu-list">
-      {menus.map((menu) => (
-        <MenuCard
-          key={menu.id}
-          menu={menu}
-          onClick={() => onSelect(menu)}
-          onDelete={() => onDelete(menu)}
-        />
-      ))}
+      {menus.map((menu) => {
+        const isExpanded = expandedMenuId === menu.id;
+
+        return (
+          <MenuCard
+            key={menu.id}
+            menu={menu}
+            expanded={isExpanded}
+            onToggle={() => onToggle(menu)}
+            onDelete={() => onDelete(menu)}
+            onStatusChange={(status) =>
+              onStatusChange(menu, status)
+            }
+          >
+            {isExpanded &&
+              (expandedLoading ? (
+                <p className="muted">Loading menu...</p>
+              ) : (
+                expandedMenu && (
+                  <MenuDetails
+                    menu={expandedMenu}
+                    dishes={dishes}
+                    onSave={onSaveMeal}
+                    onDelete={onDeleteMeal}
+                  />
+                )
+              ))}
+          </MenuCard>
+        );
+      })}
     </div>
   );
 }

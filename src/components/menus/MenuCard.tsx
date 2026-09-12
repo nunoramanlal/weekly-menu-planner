@@ -1,6 +1,4 @@
-import type { Menu } from '../../types/menu';
-
-import StatusBadge from './StatusBadge';
+import type { Menu, MenuStatus } from '../../types/menu';
 
 import {
   formatDate,
@@ -9,14 +7,20 @@ import {
 
 interface Props {
   menu: Menu;
-  onClick: () => void;
+  expanded: boolean;
+  onToggle: () => void;
   onDelete: () => void;
+  onStatusChange: (status: MenuStatus) => void;
+  children?: React.ReactNode;
 }
 
 export default function MenuCard({
   menu,
-  onClick,
+  expanded,
+  onToggle,
   onDelete,
+  onStatusChange,
+  children,
 }: Props) {
   return (
     <article className="menu-card">
@@ -24,7 +28,8 @@ export default function MenuCard({
         <button
           className="menu-card-main"
           type="button"
-          onClick={onClick}
+          onClick={onToggle}
+          aria-expanded={expanded}
         >
           <div className="eyebrow">
             {getWeekLabel(menu.week_start)}
@@ -53,7 +58,22 @@ export default function MenuCard({
       </div>
 
       <div className="menu-card-meta">
-        <StatusBadge status={menu.status} />
+        <select
+          className={`status-select status-${menu.status}`}
+          value={menu.status}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(event) => {
+            event.stopPropagation();
+            onStatusChange(event.target.value as MenuStatus);
+          }}
+          aria-label={`Change status for menu starting ${formatDate(
+            menu.week_start
+          )}`}
+        >
+          <option value="current">Current</option>
+          <option value="previous">Previous</option>
+          <option value="backlog">Backlog</option>
+        </select>
       </div>
 
       {menu.notes && (
@@ -66,11 +86,17 @@ export default function MenuCard({
         <button
           className="button secondary small"
           type="button"
-          onClick={onClick}
+          onClick={onToggle}
         >
-          View menu
+          {expanded ? 'Hide menu' : 'View menu'}
         </button>
       </div>
+
+      {expanded && (
+        <div className="menu-card-expanded">
+          {children}
+        </div>
+      )}
     </article>
   );
 }

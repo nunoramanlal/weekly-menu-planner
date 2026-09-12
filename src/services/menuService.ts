@@ -6,6 +6,7 @@ import type {
   MealType,
   Menu,
   MenuDay,
+  MenuStatus,
   MenuWithDays,
 } from '../types/menu';
 
@@ -180,5 +181,43 @@ export async function deleteMenu(
     throw new Error(
       `Could not delete menu: ${menuError.message}`
     );
+  }
+}
+
+export async function updateMenuStatus(
+  menu: Menu,
+  newStatus: MenuStatus,
+  allMenus: Menu[]
+): Promise<void> {
+  if (newStatus === 'current') {
+    const oldCurrent = allMenus.find(
+      (m) => m.status === 'current' && m.id !== menu.id
+    );
+    const oldPrevious = allMenus.find(
+      (m) => m.status === 'previous' && m.id !== menu.id
+    );
+
+    if (oldPrevious) {
+      await supabase
+        .from('menus')
+        .update({ status: 'backlog' })
+        .eq('id', oldPrevious.id);
+    }
+
+    if (oldCurrent) {
+      await supabase
+        .from('menus')
+        .update({ status: 'previous' })
+        .eq('id', oldCurrent.id);
+    }
+  }
+
+  const { error } = await supabase
+    .from('menus')
+    .update({ status: newStatus })
+    .eq('id', menu.id);
+
+  if (error) {
+    throw error;
   }
 }

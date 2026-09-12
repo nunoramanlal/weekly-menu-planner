@@ -3,20 +3,23 @@ import { useEffect, useState } from 'react';
 import type {
   Dish,
   Menu,
+  MenuStatus,
   MenuWithDays,
 } from '../types/menu';
 
 import {
   deleteMenu,
+  deleteMenuDay,
   getMenu,
   getMenus,
+  updateMenuDay,
+  updateMenuStatus,
 } from '../services/menuService';
 
 import { getDishes } from '../services/dishService';
 
 import PageHeader from '../components/layout/PageHeader';
 import MenuList from '../components/menus/MenuList';
-import MenuModal from '../components/menus/MenuModal';
 import Loading from '../components/common/Loading';
 
 import { sortMenus } from '../utils/menu';
@@ -31,8 +34,14 @@ export default function MenusPage({
   const [menus, setMenus] = useState<Menu[]>([]);
   const [dishes, setDishes] = useState<Dish[]>([]);
 
-  const [selectedMenu, setSelectedMenu] =
+  const [expandedMenuId, setExpandedMenuId] =
+    useState<number | null>(null);
+
+  const [expandedMenu, setExpandedMenu] =
     useState<MenuWithDays | null>(null);
+
+  const [expandedLoading, setExpandedLoading] =
+    useState(false);
 
   const [loading, setLoading] =
     useState(true);
@@ -68,19 +77,32 @@ export default function MenusPage({
     }
   }
 
-  async function handleSelect(menu: Menu) {
+  async function handleToggle(menu: Menu) {
+    if (expandedMenuId === menu.id) {
+      setExpandedMenuId(null);
+      setExpandedMenu(null);
+      return;
+    }
+
+    setExpandedMenuId(menu.id);
+    setExpandedMenu(null);
+
     try {
       setError(null);
+      setExpandedLoading(true);
 
       const fullMenu = await getMenu(menu.id);
 
-      setSelectedMenu(fullMenu);
+      setExpandedMenu(fullMenu);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : 'Could not load menu.'
       );
+      setExpandedMenuId(null);
+    } finally {
+      setExpandedLoading(false);
     }
   }
 
@@ -104,8 +126,9 @@ export default function MenusPage({
         )
       );
 
-      if (selectedMenu?.id === menu.id) {
-        setSelectedMenu(null);
+      if (expandedMenuId === menu.id) {
+        setExpandedMenuId(null);
+        setExpandedMenu(null);
       }
     } catch (err) {
       setError(
@@ -114,6 +137,110 @@ export default function MenusPage({
           : 'Could not delete menu.'
       );
     }
+  }
+
+  async function handleStatusChange(
+    menu: Menu,
+    status: MenuStatus
+  ) {
+    if (status === menu.status) {
+      return;
+    }
+
+    const previousMenus = menus;
+
+    try {
+      setError(null);
+
+      await updateMenuStatus(menu, status, menus);
+
+      setMenus((current) =>
+        sortMenus(
+          current.map((item) => {
+            if (item.id === menu.id) {
+              return { ...item, status };
+            }
+
+            if (
+              status === 'current' &&
+              item.status === 'current'
+            ) {
+              return { ...item, status: 'previous' };
+            }
+
+            if (
+              status === 'current' &&
+              item.status === 'previous'
+            ) {
+              return { ...item, status: 'backlog' };
+            }
+
+            return item;
+          })
+        )
+      );
+
+      if (expandedMenu?.id === menu.id) {
+        setExpandedMenu((current) =>
+          current ? { ...current, status } : current
+        );
+      }
+    } catch (err) {
+      setMenus(previousMenus);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not update menu status.'
+      );
+    }
+  }
+
+  async function handleSaveMeal(
+    id: number,
+    updates: {
+      dayOfTheWeek: import('../types/menu').DayOfWeek;
+      mealType: 'lunch' | 'dinner';
+      dishId: number | null;
+    }
+  ) {
+    const updated = await updateMenuDay(id, updates);
+
+    setExpandedMenu((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const updatedDish = dishes.find(
+        (dish) => dish.id === updated.dish_id
+      );
+
+      return {
+        ...current,
+        menu_days: current.menu_days.map((day) =>
+          day.id === id
+            ? { ...day, ...updated, dish: updatedDish }
+            : day
+        ),
+      };
+    });
+  }
+
+  async function handleDeleteMeal(id: number) {
+    await deleteMenuDay(id);
+
+    setExpandedMenu((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        menu_days: current.menu_days.filter(
+          (day) => day.id !== id
+        ),
+      };
+    });
   }
 
   return (
@@ -144,17 +271,18 @@ export default function MenusPage({
       {!loading && !error && (
         <MenuList
           menus={menus}
-          onSelect={handleSelect}
+          dishes={dishes}
+          expandedMenuId={expandedMenuId}
+          expandedMenu={expandedMenu}
+          expandedLoading={expandedLoading}
+          onToggle={handleToggle}
           onCreate={onCreateMenu}
           onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+          onSaveMeal={handleSaveMeal}
+          onDeleteMeal={handleDeleteMeal}
         />
       )}
-
-      <MenuModal
-        menu={selectedMenu}
-        dishes={dishes}
-        onClose={() => setSelectedMenu(null)}
-      />
     </>
   );
 }
