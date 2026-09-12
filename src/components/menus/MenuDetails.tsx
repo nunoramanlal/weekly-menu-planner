@@ -4,7 +4,7 @@ import type {
   MenuWithDays,
 } from '../../types/menu';
 
-import { dayLabels } from '../../utils/menu';
+import { daysOfWeek, dayLabels } from '../../utils/menu';
 
 import MealEditor from './MealEditor';
 
@@ -22,16 +22,6 @@ interface Props {
   onDelete: (id: number) => Promise<void>;
 }
 
-const days: DayOfWeek[] = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
-];
-
 export default function MenuDetails({
   menu,
   dishes,
@@ -40,7 +30,7 @@ export default function MenuDetails({
 }: Props) {
   return (
     <div className="meal-list">
-      {days.map((day) => {
+      {daysOfWeek.map((day) => {
         const meals = menu.menu_days.filter(
           (item) => item.day_of_the_week === day
         );

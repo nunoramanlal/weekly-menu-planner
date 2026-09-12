@@ -7,6 +7,8 @@ import type {
   MenuDay,
 } from '../../types/menu';
 
+import { daysOfWeek, dayLabels } from '../../utils/menu';
+
 interface Props {
   menuDay: MenuDay;
   dishes: Dish[];
@@ -21,18 +23,10 @@ interface Props {
   onDelete: (id: number) => Promise<void>;
 }
 
-const days: {
-  value: DayOfWeek;
-  label: string;
-}[] = [
-  { value: 'monday', label: 'Monday' },
-  { value: 'tuesday', label: 'Tuesday' },
-  { value: 'wednesday', label: 'Wednesday' },
-  { value: 'thursday', label: 'Thursday' },
-  { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
-  { value: 'sunday', label: 'Sunday' },
-];
+const days = daysOfWeek.map((value) => ({
+  value,
+  label: dayLabels[value],
+}));
 
 export default function MealEditor({
   menuDay,

@@ -25,20 +25,3 @@ export function getWeekLabel(
 
   return `${formatter.format(start)} – ${formatter.format(end)}`;
 }
-
-export function getNextMonday(): string {
-  const today = new Date();
-
-  const day = today.getDay();
-
-  const daysUntilMonday =
-    day === 0 ? 1 : 8 - day;
-
-  const monday = new Date(today);
-
-  monday.setDate(
-    today.getDate() + daysUntilMonday
-  );
-
-  return monday.toISOString().split('T')[0];
-}

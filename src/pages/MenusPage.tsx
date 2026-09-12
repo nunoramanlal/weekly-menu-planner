@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type {
-  Dish,
-  Menu,
-  MenuStatus,
-  MenuWithDays,
-} from '../types/menu';
-
+import type { DayOfWeek, Dish, MealType, Menu, MenuStatus, MenuWithDays } from '../types/menu';
 import {
   deleteMenu,
   deleteMenuDay,
@@ -15,13 +9,10 @@ import {
   updateMenuDay,
   updateMenuStatus,
 } from '../services/menuService';
-
 import { getDishes } from '../services/dishService';
-
 import PageHeader from '../components/layout/PageHeader';
 import MenuList from '../components/menus/MenuList';
 import Loading from '../components/common/Loading';
-
 import { sortMenus } from '../utils/menu';
 
 interface Props {
@@ -65,7 +56,7 @@ export default function MenusPage({
         ]);
 
       setMenus(sortMenus(menuData));
-      setDishes(dishData ?? []);
+      setDishes(dishData);
     } catch (err) {
       setError(
         err instanceof Error
@@ -199,8 +190,8 @@ export default function MenusPage({
   async function handleSaveMeal(
     id: number,
     updates: {
-      dayOfTheWeek: import('../types/menu').DayOfWeek;
-      mealType: 'lunch' | 'dinner';
+      dayOfTheWeek: DayOfWeek;
+      mealType: MealType;
       dishId: number | null;
     }
   ) {

@@ -17,23 +17,17 @@ import { getDishes } from '../services/dishService';
 import PageHeader from '../components/layout/PageHeader';
 import Loading from '../components/common/Loading';
 
+import { daysOfWeek, dayLabels } from '../utils/menu';
+
 interface Props {
   onCancel: () => void;
   onCreated: () => void;
 }
 
-const days: {
-  value: DayOfWeek;
-  label: string;
-}[] = [
-  { value: 'monday', label: 'Monday' },
-  { value: 'tuesday', label: 'Tuesday' },
-  { value: 'wednesday', label: 'Wednesday' },
-  { value: 'thursday', label: 'Thursday' },
-  { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
-  { value: 'sunday', label: 'Sunday' },
-];
+const days = daysOfWeek.map((value) => ({
+  value,
+  label: dayLabels[value],
+}));
 
 function getMonday(date: Date): string {
   const result = new Date(date);
@@ -104,7 +98,7 @@ export default function CreateMenuPage({
 
       const data = await getDishes();
 
-      setDishes(data ?? []);
+      setDishes(data);
     } catch (err) {
       setError(
         err instanceof Error

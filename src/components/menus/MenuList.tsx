@@ -1,5 +1,7 @@
 import type {
   Dish,
+  DayOfWeek,
+  MealType,
   Menu,
   MenuStatus,
   MenuWithDays,
@@ -19,16 +21,14 @@ interface Props {
   onCreate: () => void;
   onDelete: (menu: Menu) => void;
   onStatusChange: (menu: Menu, status: MenuStatus) => void;
-  onSaveMeal: MenuWithDays extends never
-    ? never
-    : (
-        id: number,
-        updates: {
-          dayOfTheWeek: import('../../types/menu').DayOfWeek;
-          mealType: 'lunch' | 'dinner';
-          dishId: number | null;
-        }
-      ) => Promise<void>;
+  onSaveMeal: (
+    id: number,
+    updates: {
+      dayOfTheWeek: DayOfWeek;
+      mealType: MealType;
+      dishId: number | null;
+    }
+  ) => Promise<void>;
   onDeleteMeal: (id: number) => Promise<void>;
 }
 

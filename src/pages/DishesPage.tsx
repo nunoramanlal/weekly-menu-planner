@@ -56,8 +56,8 @@ export default function DishesPage() {
           getCategories(),
         ]);
 
-      setDishes(dishData ?? []);
-      setCategories(categoryData ?? []);
+      setDishes(dishData);
+      setCategories(categoryData);
     } catch (err) {
       setError(
         err instanceof Error
